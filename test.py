@@ -12,7 +12,7 @@ from rl.agents.dqn import DQNAgent
 from rl.policy import BoltzmannQPolicy
 from rl.memory import SequentialMemory
 
-import car_env
+import car_envs
 
 
 ENV_NAME = 'car-v0'
