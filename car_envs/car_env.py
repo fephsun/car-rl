@@ -60,10 +60,10 @@ class CarEnv(gym.Env):
         if self.n_accel_options == 0:
             accel = 0
         else:
-            accel_option = action / (2 * self.n_steering_options + 1)
+            accel_option = action // (2 * self.n_steering_options + 1)
             assert accel_option < 2 * self.n_accel_options + 1
-            accel = (accel_option - self.n_accel_options) \
-                * self.car_max_accel / self.n_accel_options
+            accel = 0#(accel_option - self.n_accel_options) \
+                #* self.car_max_accel / self.n_accel_options
 
         # Get the new theta
         self.theta += steering_vel * self.dt
@@ -87,16 +87,16 @@ class CarEnv(gym.Env):
         return self.make_obs(self.window_size), reward, self.done, {}
 
     def make_obs(self, window_size):
-        half_width = window_size / 2
+        half_width = window_size // 2
         shifted_map = ndimage.shift(self.world, (self.x - self.world.shape[0] / 2,
             self.y - self.world.shape[1] / 2), mode='constant', cval=0, order=0)
         rotated_map = ndimage.rotate(shifted_map, -self.theta * 180 / np.pi,
             reshape=False, order=0)
         out_map = np.zeros((window_size, window_size, 2))
-        out_map[:, :, 0] = rotated_map[rotated_map.shape[0] / 2 - half_width
-                : rotated_map.shape[0] / 2 + half_width,
-            rotated_map.shape[1] / 2 - half_width
-                : rotated_map.shape[1] / 2 + half_width]
+        out_map[:, :, 0] = rotated_map[rotated_map.shape[0] // 2 - half_width
+                : rotated_map.shape[0] // 2 + half_width,
+            rotated_map.shape[1] // 2 - half_width
+                : rotated_map.shape[1] // 2 + half_width]
         # Draw the car.
         out_map[int(half_width - self.car_length / 2) 
                 : int(half_width + self.car_length / 2),
@@ -124,12 +124,12 @@ class CarEnv(gym.Env):
         return out_map
 
     def check_collisions(self):
-        for delta_x in [-self.car_width / 2, 0, self.car_width / 2]:
-            for delta_y in [-self.car_length / 2, 0, self.car_length / 2]:
+        for delta_x in [-self.car_width / 2, self.car_width / 2]:
+            for delta_y in [-self.car_length / 2, self.car_length / 2]:
                 x_idx = int(self.x + delta_x)
                 y_idx = int(self.y + delta_y)
                 if (x_idx < 0 or x_idx >= self.world.shape[0]
-                    or y_idx < 0 or y_idx > self.world.shape[1]):
+                    or y_idx < 0 or y_idx >= self.world.shape[1]):
                     return True
                 if self.world[x_idx, y_idx] == 0:
                     return True
